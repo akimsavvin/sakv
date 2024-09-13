@@ -10,10 +10,11 @@ import (
 	"sakv/internal/compute/query"
 	inmemory "sakv/internal/storage/engine/in-memory"
 	"sakv/pkg/sl"
+	"syscall"
 )
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{

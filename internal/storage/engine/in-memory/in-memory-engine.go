@@ -19,9 +19,7 @@ func NewEngine() *Engine {
 	}
 }
 
-func (e *Engine) GET(ctx context.Context, key string) (string, error) {
-	_ = ctx
-
+func (e *Engine) GET(_ context.Context, key string) (string, error) {
 	val, ok := e.data[key]
 	if !ok {
 		return "", ErrNotFound
@@ -30,14 +28,12 @@ func (e *Engine) GET(ctx context.Context, key string) (string, error) {
 	return val, nil
 }
 
-func (e *Engine) SET(ctx context.Context, key, value string) error {
-	_ = ctx
+func (e *Engine) SET(_ context.Context, key, value string) error {
 	e.data[key] = value
 	return nil
 }
 
-func (e *Engine) DEL(ctx context.Context, key string) error {
-	_ = ctx
+func (e *Engine) DEL(_ context.Context, key string) error {
 	delete(e.data, key)
 	return nil
 }
