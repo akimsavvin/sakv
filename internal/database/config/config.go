@@ -9,19 +9,19 @@ type Config struct {
 }
 
 type Logging struct {
-	Level  string `yaml:"level"`
-	Output string `yaml:"output"`
+	Level  string `yaml:"level" env-default:"info"`
+	Output string `yaml:"output" env-default:"log/output.log"`
 }
 
 type Engine struct {
-	Type string `yaml:"type"`
+	Type string `yaml:"type" env-default:"in_memory"`
 }
 
 type Network struct {
-	Addr        string `yaml:"address"`
-	MaxConns    int    `yaml:"max_connections"`
-	MaxMsgSize  string `yaml:"max_message_size"`
-	IdleTimeout string `yaml:"idle_timeout"`
+	Addr        string `yaml:"address" env-default:"127.0.0.1:3223"`
+	MaxConns    int    `yaml:"max_connections" env-default:"10"`
+	MaxMsgSize  string `yaml:"max_message_size" env-default:"2kb"`
+	IdleTimeout string `yaml:"idle_timeout" env-default:"5m"`
 }
 
 func New(filePath string) (*Config, error) {
