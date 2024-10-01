@@ -7,6 +7,10 @@ import (
 	"sakv/pkg/sl"
 )
 
+const (
+	InMemory = "in_memory"
+)
+
 type Factory interface {
 	CreateEngine(cfg config.Engine) Engine
 }
@@ -26,7 +30,7 @@ func (f *factory) CreateEngine(cfg config.Engine) Engine {
 	log.Debug("creating an engine", slog.Any("config", cfg))
 
 	switch cfg.Type {
-	case "in_memory":
+	case InMemory:
 		log.Info("creating the in memory engine")
 		return inmemory.NewEngine(f.log)
 	default:
