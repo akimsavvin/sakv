@@ -11,7 +11,9 @@ network:
   # When the connection number reached the provided value
   # listener refuses all incoming connections
   max_connections: 100
-  # The maximum message size in bytes
+  # The maximum message size
+  # example: 4kb, 1mb, 2gb, 1024b, 2048
+  # if no suffix specified, the number will be considered as bytes
   max_message_size: 4096
   # Time to wait after the last command to refuse the connection
   idle_timeout: 5m

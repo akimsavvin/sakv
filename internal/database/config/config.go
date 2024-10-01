@@ -20,7 +20,7 @@ type Engine struct {
 type Network struct {
 	Addr        string `yaml:"address"`
 	MaxConns    int    `yaml:"max_connections"`
-	MaxMsgSize  int    `yaml:"max_message_size"`
+	MaxMsgSize  string `yaml:"max_message_size"`
 	IdleTimeout string `yaml:"idle_timeout"`
 }
 

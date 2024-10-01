@@ -21,6 +21,7 @@ type Listener struct {
 	qh  QueryHandler
 
 	idleTimeout time.Duration
+	maxMsgSize  uint
 
 	mx         sync.Mutex
 	connsCount int
@@ -36,11 +37,17 @@ func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, erro
 		return nil, err
 	}
 
+	maxMsgSize, err := parseMemorySize(cfg.MaxMsgSize)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Listener{
 		log:         log.With(sl.Comp("listener.Listener")),
 		cfg:         cfg,
 		qh:          qh,
 		idleTimeout: idleTimeout,
+		maxMsgSize:  maxMsgSize,
 	}, nil
 }
 
@@ -125,7 +132,7 @@ func (l *Listener) listenConn(ctx context.Context, conn net.Conn) error {
 		default:
 			t.Reset(l.idleTimeout)
 
-			buf := make([]byte, l.cfg.MaxMsgSize)
+			buf := make([]byte, l.maxMsgSize)
 			n, err := conn.Read(buf)
 			if err != nil {
 				log.ErrorContext(ctx, "an error occurred while reading connection query", sl.Err(err))
