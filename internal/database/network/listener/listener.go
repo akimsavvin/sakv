@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"sakv/internal/database/config"
+	"sakv/pkg/memory"
 	"sakv/pkg/semaphore"
 	"sakv/pkg/sl"
 	"time"
@@ -36,7 +37,7 @@ func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, erro
 		return nil, err
 	}
 
-	maxMsgSize, err := parseMemorySize(cfg.MaxMsgSize)
+	maxMsgSize, err := memory.ParseSize(cfg.MaxMsgSize)
 	if err != nil {
 		return nil, err
 	}
