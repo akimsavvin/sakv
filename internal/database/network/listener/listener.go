@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"net"
 	"sakv/internal/database/config"
+	"sakv/pkg/semaphore"
 	"sakv/pkg/sl"
-	"sync"
 	"time"
 )
 
@@ -17,14 +17,13 @@ type QueryHandler interface {
 
 type Listener struct {
 	log *slog.Logger
-	cfg config.Network
 	qh  QueryHandler
 
+	addr        string
 	idleTimeout time.Duration
 	maxMsgSize  uint
 
-	mx         sync.Mutex
-	connsCount int
+	sm *semaphore.Semaphore
 }
 
 var (
@@ -44,17 +43,18 @@ func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, erro
 
 	return &Listener{
 		log:         log.With(sl.Comp("listener.Listener")),
-		cfg:         cfg,
 		qh:          qh,
+		addr:        cfg.Addr,
 		idleTimeout: idleTimeout,
 		maxMsgSize:  maxMsgSize,
+		sm:          semaphore.New(cfg.MaxConns),
 	}, nil
 }
 
 func (l *Listener) StartListening(ctx context.Context) error {
-	l.log.DebugContext(ctx, "starting listening", slog.Any("config", l.cfg))
+	l.log.DebugContext(ctx, "starting listening", slog.Any("addr", l.addr))
 
-	netl, err := net.Listen("tcp", l.cfg.Addr)
+	netl, err := net.Listen("tcp", l.addr)
 	if err != nil {
 		return err
 	}
@@ -83,17 +83,11 @@ func (l *Listener) handleConn(ctx context.Context, conn net.Conn) {
 	log := l.log.With(slog.String("conn_addr", conn.RemoteAddr().String()))
 	log.InfoContext(ctx, "handling connection")
 
-	l.mx.Lock()
-	defer l.mx.Unlock()
-
-	if l.connsCount >= l.cfg.MaxConns {
-		l.log.Warn("max connections reached, closing connection")
-		conn.Close()
-		return
-	}
-
-	l.connsCount++
-	go l.listenConn(ctx, conn)
+	l.sm.Acquire()
+	go func() {
+		defer l.sm.Release()
+		l.listenConn(ctx, conn)
+	}()
 
 	log.InfoContext(ctx, "connection accepted")
 }
@@ -102,12 +96,6 @@ func (l *Listener) listenConn(ctx context.Context, conn net.Conn) error {
 	log := l.log.With(slog.String("conn_addr", conn.RemoteAddr().String()))
 
 	log.DebugContext(ctx, "starting connection listening")
-
-	defer func() {
-		l.mx.Lock()
-		l.connsCount--
-		l.mx.Unlock()
-	}()
 
 	defer func() {
 		log.DebugContext(ctx, "closing connection")
@@ -119,12 +107,12 @@ func (l *Listener) listenConn(ctx context.Context, conn net.Conn) error {
 	}()
 
 	t := time.NewTicker(l.idleTimeout)
+	defer t.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.InfoContext(ctx, "context done")
-			t.Stop()
 			return ctx.Err()
 		case <-t.C:
 			log.InfoContext(ctx, "idle timeout")
