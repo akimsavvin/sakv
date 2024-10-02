@@ -1,14 +1,16 @@
 package semaphore
 
-import "sync"
+import (
+	"sync"
+)
 
 type Semaphore struct {
 	c            *sync.Cond
 	current, max int
 }
 
-func New(max int) *Semaphore {
-	return &Semaphore{
+func New(max int) Semaphore {
+	return Semaphore{
 		c:   sync.NewCond(new(sync.Mutex)),
 		max: max,
 	}

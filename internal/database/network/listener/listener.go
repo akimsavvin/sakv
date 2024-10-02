@@ -24,7 +24,7 @@ type Listener struct {
 	idleTimeout time.Duration
 	maxMsgSize  uint
 
-	sm *semaphore.Semaphore
+	sm semaphore.Semaphore
 }
 
 var (
@@ -60,12 +60,13 @@ func (l *Listener) StartListening(ctx context.Context) error {
 		return err
 	}
 
-	go func() error {
+	go func() {
 		<-ctx.Done()
-		return netl.Close()
+		netl.Close()
 	}()
 
 	for {
+		l.sm.Acquire()
 		conn, err := netl.Accept()
 		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
@@ -76,21 +77,14 @@ func (l *Listener) StartListening(ctx context.Context) error {
 			l.log.ErrorContext(ctx, "listening failed, an error occurred while accepting connection", sl.Err(err))
 			continue
 		}
-		l.handleConn(ctx, conn)
+
+		l.log.DebugContext(ctx, "accepted new connection", slog.String("addr", conn.RemoteAddr().String()))
+
+		go func() {
+			defer l.sm.Release()
+			l.listenConn(ctx, conn)
+		}()
 	}
-}
-
-func (l *Listener) handleConn(ctx context.Context, conn net.Conn) {
-	log := l.log.With(slog.String("conn_addr", conn.RemoteAddr().String()))
-	log.InfoContext(ctx, "handling connection")
-
-	l.sm.Acquire()
-	go func() {
-		defer l.sm.Release()
-		l.listenConn(ctx, conn)
-	}()
-
-	log.InfoContext(ctx, "connection accepted")
 }
 
 func (l *Listener) listenConn(ctx context.Context, conn net.Conn) error {
