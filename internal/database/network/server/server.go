@@ -1,4 +1,4 @@
-package listener
+package server
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type QueryHandler interface {
 	HandleQuery(ctx context.Context, query string) string
 }
 
-type Listener struct {
+type Server struct {
 	log *slog.Logger
 	qh  QueryHandler
 
@@ -31,7 +31,7 @@ var (
 	ErrIdleTimeout = errors.New("idle timeout")
 )
 
-func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, error) {
+func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Server, error) {
 	idleTimeout, err := time.ParseDuration(cfg.IdleTimeout)
 	if err != nil {
 		return nil, err
@@ -42,8 +42,8 @@ func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, erro
 		return nil, err
 	}
 
-	return &Listener{
-		log:         log.With(sl.Comp("listener.Listener")),
+	return &Server{
+		log:         log.With(sl.Comp("server.Server")),
 		qh:          qh,
 		addr:        cfg.Addr,
 		idleTimeout: idleTimeout,
@@ -52,7 +52,7 @@ func New(log *slog.Logger, cfg config.Network, qh QueryHandler) (*Listener, erro
 	}, nil
 }
 
-func (l *Listener) StartListening(ctx context.Context) error {
+func (l *Server) Start(ctx context.Context) error {
 	l.log.DebugContext(ctx, "starting listening", slog.Any("addr", l.addr))
 
 	netl, err := net.Listen("tcp", l.addr)
@@ -87,7 +87,7 @@ func (l *Listener) StartListening(ctx context.Context) error {
 	}
 }
 
-func (l *Listener) listenConn(ctx context.Context, conn net.Conn) error {
+func (l *Server) listenConn(ctx context.Context, conn net.Conn) error {
 	log := l.log.With(slog.String("conn_addr", conn.RemoteAddr().String()))
 
 	log.DebugContext(ctx, "starting connection listening")

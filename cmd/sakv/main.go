@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"sakv/internal/database/compute/query"
 	"sakv/internal/database/config"
-	"sakv/internal/database/network/listener"
+	"sakv/internal/database/network/server"
 	"sakv/internal/database/storage/engine"
 	"sakv/pkg/sl"
 	"syscall"
@@ -35,12 +35,12 @@ func main() {
 	ef := engine.NewFactory(log)
 	e := ef.CreateEngine(cfg.Engine)
 	h := query.NewHandler(log, e)
-	l, err := listener.New(log, cfg.Network, h)
+	l, err := server.New(log, cfg.Network, h)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := l.StartListening(ctx); err != nil {
+	if err := l.Start(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			log.Info("application stopped")
 			return

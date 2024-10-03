@@ -9,7 +9,7 @@ network:
   address: "127.0.0.1:3223"
   # Maximum connections to handle
   # When the connection number reached the provided value
-  # listener refuses all incoming connections
+  # server refuses all incoming connections
   max_connections: 100
   # The maximum message size
   # example: 4kb, 1mb, 2gb, 1024b, 2048
