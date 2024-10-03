@@ -1,0 +1,26 @@
+# Engine parameters
+engine:
+  # Engine type, the only supported one is "in_memory"
+  type: "in_memory"
+
+# Database network parameters
+network:
+  # Address to listen on
+  address: "127.0.0.1:3223"
+  # Maximum connections to handle
+  # When the connection number reached the provided value
+  # server refuses all incoming connections
+  max_connections: 100
+  # The maximum message size
+  # example: 4kb, 1mb, 2gb, 1024b, 2048
+  # if no suffix specified, the number will be considered as bytes
+  max_message_size: 4096
+  # Time to wait after the last command to refuse the connection
+  idle_timeout: 5m
+
+# Logging parameters
+logging:
+  # Minimum logging level
+  level: "debug"
+  # Logs output file
+  output: "log/output.log"

@@ -2,13 +2,16 @@ package inmemory
 
 import (
 	"context"
+	slogmock "github.com/samber/slog-mock"
 	"github.com/stretchr/testify/assert"
+	"log/slog"
 	"testing"
 )
 
 func TestEngine_GET(t *testing.T) {
 	// Arrange
-	e := NewEngine()
+	logmock := slog.New(new(slogmock.MockHandler))
+	e := NewEngine(logmock)
 	e.data = map[string]string{"key": "value"}
 	ctx := context.Background()
 
@@ -22,7 +25,8 @@ func TestEngine_GET(t *testing.T) {
 
 func TestEngine_SET(t *testing.T) {
 	// Arrange
-	e := NewEngine()
+	logmock := slog.New(new(slogmock.MockHandler))
+	e := NewEngine(logmock)
 	ctx := context.Background()
 
 	// Act
@@ -37,7 +41,8 @@ func TestEngine_SET(t *testing.T) {
 
 func TestEngine_DEL(t *testing.T) {
 	// Arrange
-	e := NewEngine()
+	logmock := slog.New(new(slogmock.MockHandler))
+	e := NewEngine(logmock)
 	e.data = map[string]string{"key": "value"}
 	ctx := context.Background()
 

@@ -3,29 +3,44 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"flag"
 	"os"
 	"os/signal"
-	"sakv/internal/compute/listener"
-	"sakv/internal/compute/query"
-	inmemory "sakv/internal/storage/engine/in-memory"
+	"sakv/internal/database/compute/query"
+	"sakv/internal/database/config"
+	"sakv/internal/database/network/server"
+	"sakv/internal/database/storage/engine"
 	"sakv/pkg/sl"
 	"syscall"
 )
+
+var configFilePath string
+
+func init() {
+	flag.StringVar(&configFilePath, "config", "./config/config.yaml", "path to sakv config file")
+}
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
+	cfg := config.MustNew(configFilePath)
 
-	inMemoryEngine := inmemory.NewEngine()
-	h := query.NewHandler(inMemoryEngine)
-	l := listener.New(h)
+	log, close, err := sl.NewLogger(cfg.Logging)
+	if err != nil {
+		panic(err)
+	}
+	defer close()
 
-	if err := l.StartListening(ctx); err != nil {
+	ef := engine.NewFactory(log)
+	e := ef.CreateEngine(cfg.Engine)
+	h := query.NewHandler(log, e)
+	l, err := server.New(log, cfg.Network, h)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := l.Start(ctx); err != nil {
 		if errors.Is(err, context.Canceled) {
 			log.Info("application stopped")
 			return
