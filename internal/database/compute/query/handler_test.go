@@ -3,10 +3,10 @@ package query
 import (
 	"context"
 	"errors"
+	enginemock "github.com/akimsavvin/sakv/internal/database/storage/engine/mock"
 	slogmock "github.com/samber/slog-mock"
 	"github.com/stretchr/testify/suite"
 	"log/slog"
-	"sakv/internal/database/storage/engine/mock"
 	"strings"
 	"testing"
 )
@@ -31,7 +31,7 @@ func (suite *HandleQuerySuite) TestGETSuccess() {
 	ctx := context.Background()
 	suite.eMock.On("GET", ctx, "key").Return("value", nil)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)
@@ -48,7 +48,7 @@ func (suite *HandleQuerySuite) TestGETError() {
 	ctx := context.Background()
 	suite.eMock.On("GET", ctx, "key").Return("", errors.ErrUnsupported)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)
@@ -64,7 +64,7 @@ func (suite *HandleQuerySuite) TestSETSuccess() {
 	ctx := context.Background()
 	suite.eMock.On("SET", ctx, "key", "value").Return(nil)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)
@@ -80,7 +80,7 @@ func (suite *HandleQuerySuite) TestSETError() {
 	ctx := context.Background()
 	suite.eMock.On("SET", ctx, "key", "value").Return(errors.ErrUnsupported)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)
@@ -96,7 +96,7 @@ func (suite *HandleQuerySuite) TestDELSuccess() {
 	ctx := context.Background()
 	suite.eMock.On("DEL", ctx, "key").Return(nil)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)
@@ -112,7 +112,7 @@ func (suite *HandleQuerySuite) TestDELError() {
 	ctx := context.Background()
 	suite.eMock.On("DEL", ctx, "key").Return(errors.ErrUnsupported)
 
-	h := NewHandler(suite.logMock, suite.eMock)
+	h := NewHandler(suite.logMock, nil, suite.eMock)
 
 	// Act
 	res := h.HandleQuery(ctx, query)

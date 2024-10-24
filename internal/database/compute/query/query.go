@@ -30,6 +30,10 @@ func (q *Query) Command() Command {
 	return q.command
 }
 
+func (q *Query) Args() []string {
+	return q.args
+}
+
 func (q *Query) Arg(i int) string {
 	return q.args[i]
 }

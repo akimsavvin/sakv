@@ -8,7 +8,6 @@ import (
 type Suffix string
 
 const (
-	SuffixB  Suffix = "b"
 	SuffixKB Suffix = "kb"
 	SuffixMB Suffix = "mb"
 	SuffixGB Suffix = "gb"
@@ -16,7 +15,6 @@ const (
 )
 
 var memoryUnitMultiplier = map[Suffix]uint{
-	SuffixB:  1,
 	SuffixKB: 1 << 10, // 1024
 	SuffixMB: 1 << 20, // 1024 * 1024
 	SuffixGB: 1 << 30, // 1024 * 1024 * 1024
@@ -24,7 +22,7 @@ var memoryUnitMultiplier = map[Suffix]uint{
 }
 
 func ParseSize(sizeStr string) (uint, error) {
-	sizeStr = strings.TrimSpace(sizeStr)
+	sizeStr = strings.ToLower(strings.TrimSpace(sizeStr))
 
 	for unit, multiplier := range memoryUnitMultiplier {
 		if strings.HasSuffix(sizeStr, string(unit)) {

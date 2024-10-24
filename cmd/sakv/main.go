@@ -2,15 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
+	"github.com/akimsavvin/sakv/internal/database/app"
+	"log"
 	"os"
 	"os/signal"
-	"sakv/internal/database/compute/query"
-	"sakv/internal/database/config"
-	"sakv/internal/database/network/server"
-	"sakv/internal/database/storage/engine"
-	"sakv/pkg/sl"
 	"syscall"
 )
 
@@ -24,28 +20,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	cfg := config.MustNew(configFilePath)
-
-	log, close, err := sl.NewLogger(cfg.Logging)
-	if err != nil {
-		panic(err)
-	}
-	defer close()
-
-	ef := engine.NewFactory(log)
-	e := ef.CreateEngine(cfg.Engine)
-	h := query.NewHandler(log, e)
-	l, err := server.New(log, cfg.Network, h)
-	if err != nil {
-		panic(err)
-	}
-
-	if err := l.Start(ctx); err != nil {
-		if errors.Is(err, context.Canceled) {
-			log.Info("application stopped")
-			return
-		}
-
-		log.Error("some error occurred while listening", sl.Err(err))
+	if err := app.Start(ctx, configFilePath); err != nil {
+		log.Fatalln(err)
 	}
 }

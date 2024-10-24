@@ -1,11 +1,11 @@
 package engine
 
 import (
+	"github.com/akimsavvin/sakv/internal/database/config"
+	inmemory "github.com/akimsavvin/sakv/internal/database/storage/engine/in-memory"
 	slogmock "github.com/samber/slog-mock"
 	"github.com/stretchr/testify/suite"
 	"log/slog"
-	"sakv/internal/database/config"
-	inmemory "sakv/internal/database/storage/engine/in-memory"
 	"testing"
 )
 
@@ -23,7 +23,7 @@ func (suite *CreateEngineSuite) SetupTest() {}
 
 func (suite *CreateEngineSuite) TestInMemory() {
 	// Arrange
-	cfg := config.Engine{Type: "in_memory"}
+	cfg := config.Engine{Type: InMemory}
 	f := NewFactory(suite.logmock)
 
 	// Act
@@ -39,10 +39,13 @@ func (suite *CreateEngineSuite) TestUnknown() {
 	cfg := config.Engine{Type: "unknown"}
 	f := NewFactory(suite.logmock)
 
-	// Act & Assert
-	suite.Panics(func() {
+	// Act
+	action := func() {
 		f.CreateEngine(cfg)
-	})
+	}
+
+	// Assert
+	suite.Panics(action)
 }
 
 func TestFactory_CreateEngine(t *testing.T) {
