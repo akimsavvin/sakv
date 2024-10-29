@@ -1,14 +1,17 @@
 package filesegment
 
 import (
+	slogmock "github.com/samber/slog-mock"
 	"github.com/stretchr/testify/assert"
+	"log/slog"
 	"os"
 	"testing"
 )
 
 func TestFactory_Create(t *testing.T) {
 	// Arrange
-	fsf := NewFactory()
+	log := slog.New(new(slogmock.MockHandler))
+	fsf := NewFactory(log)
 
 	// Act
 	s, err := fsf.Create("./")
