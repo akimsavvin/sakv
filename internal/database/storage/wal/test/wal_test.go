@@ -152,16 +152,11 @@ func (suite *RecoverSuite) TestSuccess() {
 		close(errsCh)
 	}()
 
-	resQueriesCh, resErrsCh := inst.Recover(ctx)
+	res, err := inst.Recover(ctx)
 
 	// Assert
-	resQueries := make([]string, 0)
-	for query := range resQueriesCh {
-		resQueries = append(resQueries, query)
-	}
-
-	suite.NoError(<-resErrsCh)
-	suite.Equal(queries, resQueries)
+	suite.NoError(err)
+	suite.Equal(queries, res)
 }
 
 func (suite *RecoverSuite) TestError() {
@@ -184,16 +179,11 @@ func (suite *RecoverSuite) TestError() {
 		close(errsCh)
 	}()
 
-	resQueriesCh, resErrsCh := inst.Recover(ctx)
+	res, err := inst.Recover(ctx)
 
 	// Assert
-	resQueries := make([]string, 0)
-	for query := range resQueriesCh {
-		resQueries = append(resQueries, query)
-	}
-
-	suite.Error(<-resErrsCh)
-	suite.Empty(resQueries)
+	suite.Error(err)
+	suite.Empty(res)
 }
 
 func (suite *RecoverSuite) TestCancel() {
@@ -209,17 +199,14 @@ func (suite *RecoverSuite) TestCancel() {
 		Return(segmentsCh, errsCh)
 
 	// Act
-	resQueriesCh, resErrsCh := inst.Recover(ctx)
-	cancel()
+	go cancel()
+	res, err := inst.Recover(ctx)
 
 	// Assert
-	resQueries := make([]string, 0)
-	for query := range resQueriesCh {
-		resQueries = append(resQueries, query)
+	suite.Empty(res)
+	if suite.Error(err) {
+		suite.Equal(context.Canceled, err)
 	}
-
-	suite.Error(<-resErrsCh)
-	suite.Empty(resQueries)
 }
 
 func TestWAL_Recover(t *testing.T) {

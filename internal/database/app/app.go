@@ -25,7 +25,7 @@ func Start(ctx context.Context, configFilePath string) error {
 	ef := engine.NewFactory(log)
 	e := ef.CreateEngine(cfg.Engine)
 
-	sf := filesegment.NewFactory()
+	sf := filesegment.NewFactory(log)
 	ss := filesegment.NewStreamer(log, cfg.WAL.DataDirectory)
 
 	var walInst *wal.WAL
@@ -36,11 +36,13 @@ func Start(ctx context.Context, configFilePath string) error {
 			return err
 		}
 
-		queries, errs := walInst.Recover(ctx)
-		r := restoration.NewRestorer(log)
-		if err = r.Restore(ctx, e, queries, errs); err != nil {
+		queries, err := walInst.Recover(ctx)
+		if err != nil {
 			return err
 		}
+
+		r := restoration.NewRestorer(log)
+		r.Restore(ctx, e, queries)
 	}
 
 	h := query.NewHandler(log, walInst, e)
