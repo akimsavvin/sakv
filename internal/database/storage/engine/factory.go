@@ -1,10 +1,10 @@
 package engine
 
 import (
+	"github.com/akimsavvin/sakv/internal/database/config"
+	"github.com/akimsavvin/sakv/internal/database/storage/engine/in-memory"
+	"github.com/akimsavvin/sakv/pkg/sl"
 	"log/slog"
-	"sakv/internal/database/config"
-	"sakv/internal/database/storage/engine/in-memory"
-	"sakv/pkg/sl"
 )
 
 const (

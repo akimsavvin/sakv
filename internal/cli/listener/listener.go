@@ -22,15 +22,31 @@ func New(qh QueryHandler) *Listener {
 }
 
 func (l *Listener) StartListening(ctx context.Context) error {
+	queries := make(chan string)
+
+	go func() {
+		scanner := bufio.NewScanner(os.Stdin)
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			scanner.Scan()
+			queries <- scanner.Text()
+		}
+	}()
+
 	for {
+		fmt.Println("Enter a query:")
+
 		select {
 		case <-ctx.Done():
+			fmt.Println("Stopped listening")
 			return ctx.Err()
-		default:
-			fmt.Println("Enter a query:")
-			scanner := bufio.NewScanner(os.Stdin)
-			scanner.Scan()
-			query := scanner.Text()
+		case query := <-queries:
 			resp := l.qh.HandleQuery(ctx, query)
 			fmt.Println(resp)
 		}

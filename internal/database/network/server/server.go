@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/akimsavvin/sakv/internal/database/config"
+	"github.com/akimsavvin/sakv/pkg/concur/semaphore"
+	"github.com/akimsavvin/sakv/pkg/memory"
+	"github.com/akimsavvin/sakv/pkg/sl"
 	"log/slog"
 	"net"
-	"sakv/internal/database/config"
-	"sakv/pkg/memory"
-	"sakv/pkg/semaphore"
-	"sakv/pkg/sl"
 	"time"
 )
 

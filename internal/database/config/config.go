@@ -6,6 +6,7 @@ type Config struct {
 	Logging Logging `yaml:"logging"`
 	Engine  Engine  `yaml:"engine"`
 	Network Network `yaml:"network"`
+	WAL     WAL     `yaml:"wal"`
 }
 
 type Logging struct {
@@ -22,6 +23,14 @@ type Network struct {
 	MaxConns    int    `yaml:"max_connections" env-default:"10"`
 	MaxMsgSize  string `yaml:"max_message_size" env-default:"2kb"`
 	IdleTimeout string `yaml:"idle_timeout" env-default:"5m"`
+}
+
+type WAL struct {
+	Enabled              bool   `yaml:"enabled" env-default:"true"`
+	FlushingBatchSize    int    `yaml:"flushing_batch_size" env-default:"100"`
+	FlushingBatchTimeout string `yaml:"flushing_batch_timeout" env-default:"10ms"`
+	MaxSegmentSize       string `yaml:"max_segment_size" env-default:"10mb"`
+	DataDirectory        string `yaml:"data_directory" env-default:"data/wal"`
 }
 
 func New(filePath string) (*Config, error) {

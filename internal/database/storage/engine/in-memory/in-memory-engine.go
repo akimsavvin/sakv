@@ -3,8 +3,8 @@ package inmemory
 import (
 	"context"
 	"errors"
+	"github.com/akimsavvin/sakv/pkg/sl"
 	"log/slog"
-	"sakv/pkg/sl"
 	"sync"
 )
 

@@ -1,13 +1,13 @@
 package sl
 
 import (
+	"github.com/akimsavvin/sakv/internal/database/config"
 	slogmulti "github.com/samber/slog-multi"
 	"log/slog"
 	"os"
-	"sakv/internal/database/config"
 )
 
-func NewLogger(cfg config.Logging) (log *slog.Logger, close func() error, err error) {
+func NewFileLogger(cfg config.Logging) (log *slog.Logger, close func() error, err error) {
 	f, err := os.OpenFile(cfg.Output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return

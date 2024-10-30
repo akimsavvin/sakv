@@ -24,3 +24,16 @@ logging:
   level: "debug"
   # Logs output file
   output: "log/output.log"
+
+# WAL parameters
+wal:
+  # Define whether the WAL is enabled
+  enabled: true
+  # Flushing batch size
+  flushing_batch_size: 100
+  # Flushing batch timeout
+  flushing_batch_timeout: "10ms"
+  # Maximum segment size
+  max_segment_size: "10mb"
+  # WAL data directory
+  data_directory: "/data/sakv/wal"

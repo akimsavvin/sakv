@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/akimsavvin/sakv/internal/cli/listener"
+	"github.com/akimsavvin/sakv/internal/cli/query"
 	"net"
 	"os"
 	"os/signal"
-	"sakv/internal/cli/listener"
-	"sakv/internal/cli/query"
 	"syscall"
 )
 
